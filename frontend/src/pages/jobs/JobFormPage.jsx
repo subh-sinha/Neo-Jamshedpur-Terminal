@@ -34,15 +34,27 @@ export function JobFormPage() {
     onSuccess: (data) => navigate(`/jobs/${data._id}`)
   });
 
-  const submit = () =>
-    mutation.mutate({
+  const errorDetails = mutation.error?.response?.data?.details;
+  const errorMessage = Array.isArray(errorDetails)
+    ? errorDetails.map((item) => item.msg).join(", ")
+    : mutation.error?.response?.data?.message;
+
+  const submit = () => {
+    const payload = {
       ...form,
       budget: Number(form.budget),
       requiredSkills: form.requiredSkills
         .split(",")
         .map((item) => item.trim())
         .filter(Boolean)
-    });
+    };
+
+    if (!payload.deadline) delete payload.deadline;
+    if (!payload.locationText) delete payload.locationText;
+    if (!payload.sector) delete payload.sector;
+
+    mutation.mutate(payload);
+  };
 
   return (
     <Panel>
@@ -75,7 +87,7 @@ export function JobFormPage() {
         <input className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 outline-none" value={form.locationText} onChange={(event) => setForm((current) => ({ ...current, locationText: event.target.value }))} placeholder="Location details" />
         <input className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 outline-none" value={form.sector} onChange={(event) => setForm((current) => ({ ...current, sector: event.target.value }))} placeholder="Sector / zone" />
       </div>
-      {mutation.error ? <div className="mt-4 text-sm text-danger">{mutation.error.response?.data?.message || "Could not publish job."}</div> : null}
+      {mutation.error ? <div className="mt-4 text-sm text-danger">{errorMessage || "Could not publish job."}</div> : null}
       <Button className="mt-6" onClick={submit}>
         {mutation.isPending ? "Publishing..." : "Publish listing"}
       </Button>

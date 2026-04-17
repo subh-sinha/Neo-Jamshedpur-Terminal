@@ -10,6 +10,7 @@ export function LoginPage() {
   const navigate = useNavigate();
   const setAuth = useAuthStore((state) => state.setAuth);
   const [form, setForm] = useState({ email: demoCredentials[0].email, password: demoCredentials[0].password });
+  const [showResetHint, setShowResetHint] = useState(false);
   const mutation = useMutation({
     mutationFn: authApi.login,
     onSuccess: (data) => {
@@ -41,10 +42,15 @@ export function LoginPage() {
         <button
           type="button"
           className="mt-4 text-sm text-cyber"
-          onClick={() => window.alert("Forgot password flow is not wired to email yet. Use an admin reset or implement a reset endpoint next.")}
+          onClick={() => setShowResetHint((current) => !current)}
         >
           Forgot password?
         </button>
+        {showResetHint ? (
+          <div className="mt-3 rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-slate-300">
+            Password reset email flow is not implemented yet. For now, reset the password from an admin account or add a dedicated reset-password backend endpoint.
+          </div>
+        ) : null}
         <div className="mt-6 space-y-2 text-xs text-slate-500">
           {demoCredentials.map((cred) => (
             <div key={cred.email}>{cred.role}: {cred.email} / {cred.password}</div>

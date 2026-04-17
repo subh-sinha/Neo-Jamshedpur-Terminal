@@ -35,23 +35,31 @@ export const getJobs = asyncHandler(async (req, res) => {
 });
 
 export const createJob = asyncHandler(async (req, res) => {
+  const payload = pick(req.body, [
+    "title",
+    "description",
+    "category",
+    "requiredSkills",
+    "constraints",
+    "budget",
+    "budgetType",
+    "paymentType",
+    "locationMode",
+    "locationText",
+    "sector",
+    "urgency",
+    "deadline",
+    "visibilityTier"
+  ]);
+
+  if (typeof payload.category === "string") payload.category = payload.category.toLowerCase();
+  if (typeof payload.urgency === "string") payload.urgency = payload.urgency.toLowerCase();
+  if (!payload.deadline) delete payload.deadline;
+  if (!payload.locationText) delete payload.locationText;
+  if (!payload.sector) delete payload.sector;
+
   const job = await Job.create({
-    ...pick(req.body, [
-      "title",
-      "description",
-      "category",
-      "requiredSkills",
-      "constraints",
-      "budget",
-      "budgetType",
-      "paymentType",
-      "locationMode",
-      "locationText",
-      "sector",
-      "urgency",
-      "deadline",
-      "visibilityTier"
-    ]),
+    ...payload,
     postedBy: req.user._id
   });
   res.status(201).json(job);

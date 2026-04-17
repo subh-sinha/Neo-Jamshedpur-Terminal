@@ -3,9 +3,9 @@ import { JOB_CATEGORIES, JOB_STATUS, JOB_URGENCY } from "../constants/enums.js";
 
 export const createJobValidator = [
   body("title").trim().notEmpty(),
-  body("description").trim().isLength({ min: 20 }),
-  body("category").isIn(Object.values(JOB_CATEGORIES)),
-  body("requiredSkills").optional().isArray(),
+  body("description").trim().isLength({ min: 5 }),
+  body("category").trim().toLowerCase().isIn(Object.values(JOB_CATEGORIES)),
+  body("requiredSkills").optional({ values: "falsy" }).isArray(),
   body("budget").isNumeric(),
   body("budgetType").optional().isIn(["fixed", "negotiable"]),
   body("urgency").optional().isIn(Object.values(JOB_URGENCY)),
