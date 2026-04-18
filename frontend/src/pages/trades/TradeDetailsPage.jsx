@@ -124,9 +124,26 @@ export function TradeDetailsPage() {
           ))}
         </div>
       </Panel>
+
+      {isOwner || isAdmin ? (
+        <Panel>
+          <div className="text-lg font-semibold text-danger">Danger zone</div>
+          <div className="mt-2 text-sm text-slate-400">Permanently delete this trade.</div>
+          {deleteMutation.error ? <div className="mt-3 text-sm text-danger">{deleteMutation.error.response?.data?.message || "Deletion failed."}</div> : null}
+          <Button
+            className="mt-4"
+            variant="danger"
+            disabled={deleteMutation.isPending}
+            onClick={() => {
+              if (window.confirm("Are you sure you want to permanently delete this trade?")) {
+                deleteMutation.mutate();
+              }
+            }}
+          >
+            {deleteMutation.isPending ? "Deleting..." : "Delete trade"}
+          </Button>
+        </Panel>
+      ) : null}
     </div>
   );
 }
-
-
-

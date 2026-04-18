@@ -3,8 +3,10 @@ import api from "./client";
 export const authApi = {
   register: (payload) => api.post("/auth/register", payload).then((res) => res.data),
   login: (payload) => api.post("/auth/login", payload).then((res) => res.data),
+  googleAuth: (payload) => api.post("/auth/google", payload).then((res) => res.data),
   me: () => api.get("/auth/me").then((res) => res.data),
   updateProfile: (payload) => api.put("/auth/profile", payload).then((res) => res.data),
+  requestProvider: () => api.post("/auth/request-provider").then((res) => res.data),
   resetPassword: (payload) => api.post("/auth/reset-password", payload).then((res) => res.data)
 };
 
@@ -65,7 +67,8 @@ export const userApi = {
 
 export const adminApi = {
   analytics: () => api.get("/admin/analytics").then((res) => res.data),
-  users: () => api.get("/admin/users").then((res) => res.data)
+  users: () => api.get("/admin/users").then((res) => res.data),
+  verifyUser: (id) => api.post(`/admin/users/${id}/verify`).then((res) => res.data)
 };
 
 export const searchApi = {

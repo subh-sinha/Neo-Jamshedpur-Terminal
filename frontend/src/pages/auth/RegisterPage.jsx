@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
+import { GoogleLogin } from "@react-oauth/google";
 import { authApi } from "../../api/services";
 import { useAuthStore } from "../../store/authStore";
 import { Button } from "../../components/shared/Button";
@@ -18,6 +19,14 @@ export function RegisterPage() {
 
   const mutation = useMutation({
     mutationFn: authApi.register,
+    onSuccess: (data) => {
+      setAuth(data);
+      navigate("/dashboard");
+    }
+  });
+
+  const googleMutation = useMutation({
+    mutationFn: (token) => authApi.googleAuth({ token }),
     onSuccess: (data) => {
       setAuth(data);
       navigate("/dashboard");
@@ -55,6 +64,25 @@ export function RegisterPage() {
             {mutation.isPending ? "Creating..." : "Create profile"}
           </Button>
         </form>
+
+        <div className="mt-6 flex items-center gap-4">
+          <div className="h-px flex-1 bg-white/10"></div>
+          <div className="text-xs font-medium uppercase tracking-[0.2em] text-slate-500">Or</div>
+          <div className="h-px flex-1 bg-white/10"></div>
+        </div>
+
+        <div className="mt-6 flex justify-center">
+          <GoogleLogin
+            onSuccess={(credentialResponse) => googleMutation.mutate(credentialResponse.credential)}
+            onError={() => console.error("Google Signup Failed")}
+            theme="filled_black"
+            shape="pill"
+            text="signup_with"
+          />
+        </div>
+
+        {googleMutation.error ? <div className="mt-3 text-sm text-danger">{googleMutation.error.response?.data?.message || "Google Registration failed"}</div> : null}
+
         <Link to="/login" className="mt-6 block text-sm text-cyber">
           Return to login
         </Link>
