@@ -1,6 +1,17 @@
+import { Bell, BriefcaseBusiness, Gauge, Radio, Search, Shield, Repeat2 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { navItems } from "../../lib/constants";
 import { useAuthStore } from "../../store/authStore";
+
+const navIcons = {
+  "/dashboard": Gauge,
+  "/jobs": BriefcaseBusiness,
+  "/trades": Repeat2,
+  "/pulse": Radio,
+  "/search": Search,
+  "/notifications": Bell,
+  "/admin": Shield
+};
 
 export function Sidebar() {
   const user = useAuthStore((state) => state.user);
@@ -24,7 +35,19 @@ export function Sidebar() {
                 }`
               }
             >
-              {item.label}
+              {({ isActive }) => {
+                const Icon = navIcons[item.to];
+                return (
+                  <span className="flex items-center gap-3">
+                    {Icon ? (
+                      <span className={`inline-flex h-8 w-8 items-center justify-center rounded-xl ${isActive ? "bg-slate-800 text-cyber" : "bg-slate-800/70 text-slate-400"}`}>
+                        <Icon size={16} />
+                      </span>
+                    ) : null}
+                    <span>{item.label}</span>
+                  </span>
+                );
+              }}
             </NavLink>
           ))}
           {user?.role === "admin" ? (
@@ -36,7 +59,14 @@ export function Sidebar() {
                 }`
               }
             >
-              Admin
+              {({ isActive }) => (
+                <span className="flex items-center gap-3">
+                  <span className={`inline-flex h-8 w-8 items-center justify-center rounded-xl ${isActive ? "bg-slate-800 text-danger" : "bg-slate-800/70 text-slate-400"}`}>
+                    <Shield size={16} />
+                  </span>
+                  <span>Admin</span>
+                </span>
+              )}
             </NavLink>
           ) : null}
         </nav>

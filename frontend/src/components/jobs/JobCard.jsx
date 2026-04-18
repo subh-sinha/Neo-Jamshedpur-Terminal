@@ -1,7 +1,8 @@
+import { BriefcaseBusiness, CalendarDays, MapPin } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Panel } from "../shared/Panel";
 import { StatusBadge } from "../shared/StatusBadge";
-import { formatCompactDate, formatStatusLabel } from "../../lib/utils";
+import { formatCompactDate, formatCurrency, formatStatusLabel } from "../../lib/utils";
 
 const lifecycleSteps = ["POSTED", "APPLIED", "ASSIGNED", "IN_PROGRESS", "COMPLETED", "VERIFIED"];
 
@@ -14,9 +15,17 @@ export function JobCard({ job }) {
       <Panel className="h-full transition hover:-translate-y-1 hover:shadow-glow">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <div className="font-semibold text-white">{job.title}</div>
-            <div className="mt-2 text-sm text-slate-400">
-              {formatStatusLabel(job.category)} / {job.locationMode} / {job.sector || job.locationText || "Neo-Jamshedpur"}
+            <div className="flex items-center gap-2 font-semibold text-white">
+              <BriefcaseBusiness size={16} className="text-cyber" />
+              {job.title}
+            </div>
+            <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-400">
+              <span>{formatStatusLabel(job.category)}</span>
+              <span className="inline-flex items-center gap-1">
+                <MapPin size={14} />
+                {job.locationMode}
+              </span>
+              <span>{job.sector || job.locationText || "Neo-Jamshedpur"}</span>
             </div>
           </div>
           <StatusBadge value={job.status} />
@@ -27,10 +36,11 @@ export function JobCard({ job }) {
         </div>
         <div className="mt-2 text-xs uppercase tracking-[0.24em] text-slate-500">{formatStatusLabel(job.status)}</div>
         <div className="mt-5 flex items-center justify-between text-sm">
-          <span className="text-cyber">
-            {job.budget} credits {job.budgetType === "negotiable" ? " / negotiable" : ""}
+          <span className="text-cyber">{formatCurrency(job.budget)} {job.budgetType === "negotiable" ? " / negotiable" : ""}</span>
+          <span className="inline-flex items-center gap-1 text-slate-500">
+            <CalendarDays size={14} />
+            Due {formatCompactDate(job.deadline)}
           </span>
-          <span className="text-slate-500">Due {formatCompactDate(job.deadline)}</span>
         </div>
       </Panel>
     </Link>

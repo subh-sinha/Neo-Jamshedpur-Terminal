@@ -7,6 +7,7 @@ import { StatusBadge } from "../../components/shared/StatusBadge";
 import { formatDate } from "../../lib/utils";
 import { useAuthStore } from "../../store/authStore";
 import { Button } from "../../components/shared/Button";
+import { getTradePreviewImage } from "../../lib/tradeVisuals";
 
 export function TradeDetailsPage() {
   const { id } = useParams();
@@ -27,7 +28,7 @@ export function TradeDetailsPage() {
   if (!data) return null;
 
   const isOwner = user?._id === data.owner?._id;
-  const previewImage = data.images?.[0];
+  const previewImage = getTradePreviewImage(data);
 
   return (
     <div className="grid gap-6 xl:grid-cols-[1.4fr_0.8fr]">

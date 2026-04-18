@@ -5,7 +5,7 @@ import { jobsApi } from "../../api/services";
 import { Panel } from "../../components/shared/Panel";
 import { StatusBadge } from "../../components/shared/StatusBadge";
 import { Button } from "../../components/shared/Button";
-import { formatDate, formatStatusLabel } from "../../lib/utils";
+import { formatCurrency, formatDate, formatStatusLabel } from "../../lib/utils";
 import { useAuthStore } from "../../store/authStore";
 
 const lifecycle = ["POSTED", "APPLIED", "ASSIGNED", "IN_PROGRESS", "COMPLETED", "VERIFIED"];
@@ -73,7 +73,7 @@ export function JobDetailsPage() {
           </div>
           <div className="mt-6 text-sm leading-7 text-slate-300">{data.description}</div>
           <div className="mt-6 grid gap-3 md:grid-cols-2">
-            <div className="rounded-2xl border border-white/10 bg-black/20 p-4">Budget: {data.budget} credits ({data.budgetType})</div>
+            <div className="rounded-2xl border border-white/10 bg-black/20 p-4">Budget: {formatCurrency(data.budget)} ({data.budgetType})</div>
             <div className="rounded-2xl border border-white/10 bg-black/20 p-4">Deadline: {formatDate(data.deadline)}</div>
             <div className="rounded-2xl border border-white/10 bg-black/20 p-4">Urgency: {formatStatusLabel(data.urgency)}</div>
             <div className="rounded-2xl border border-white/10 bg-black/20 p-4">Skills: {data.requiredSkills?.join(", ") || "None specified"}</div>
@@ -158,7 +158,7 @@ export function JobDetailsPage() {
                   <div>
                     <div className="font-semibold">{application.applicant?.fullName}</div>
                     <div className="mt-1 text-sm text-slate-400">{application.pitch}</div>
-                    <div className="mt-2 text-xs text-slate-500">Expected {application.expectedPrice || application.proposedBudget || "N/A"} credits</div>
+                    <div className="mt-2 text-xs text-slate-500">Expected {application.expectedPrice || application.proposedBudget ? formatCurrency(application.expectedPrice || application.proposedBudget) : "N/A"}</div>
                   </div>
                   <StatusBadge value={application.status} />
                 </div>
