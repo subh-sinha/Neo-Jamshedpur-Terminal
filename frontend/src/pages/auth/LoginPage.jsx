@@ -10,6 +10,7 @@ export function LoginPage() {
   const navigate = useNavigate();
   const setAuth = useAuthStore((state) => state.setAuth);
   const [form, setForm] = useState({ email: demoCredentials[0].email, password: demoCredentials[0].password });
+  const [resetForm, setResetForm] = useState({ email: "", oldPassword: "", newPassword: "" });
   const [showResetHint, setShowResetHint] = useState(false);
   const mutation = useMutation({
     mutationFn: authApi.login,
@@ -19,38 +20,88 @@ export function LoginPage() {
     }
   });
 
+  const resetMutation = useMutation({
+    mutationFn: authApi.resetPassword,
+    onSuccess: () => {
+      // Keep form open to show success message, or handle however
+    }
+  });
+
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
       <div className="panel w-full max-w-md p-8">
         <div className="font-mono text-xs uppercase tracking-[0.38em] text-cyber">Access Terminal</div>
         <h1 className="mt-3 text-3xl font-semibold">Citizen login</h1>
         <div className="mt-2 text-sm text-slate-400">Use seeded accounts or register a new operator.</div>
-        <form
-          className="mt-6 space-y-4"
-          onSubmit={(event) => {
-            event.preventDefault();
-            mutation.mutate(form);
-          }}
-        >
-          <input className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 outline-none" value={form.email} onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))} placeholder="Email" />
-          <input className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 outline-none" type="password" value={form.password} onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))} placeholder="Password" />
-          <Button className="w-full" type="submit">
-            {mutation.isPending ? "Authenticating..." : "Login"}
-          </Button>
-        </form>
-        {mutation.error ? <div className="mt-3 text-sm text-danger">{mutation.error.response?.data?.message || "Login failed"}</div> : null}
+        {!showResetHint ? (
+          <>
+            <form
+              className="mt-6 space-y-4"
+              onSubmit={(event) => {
+                event.preventDefault();
+                mutation.mutate(form);
+              }}
+            >
+              <input className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 outline-none" value={form.email} onChange={(event) => setForm((current) => ({ ...current, email: event.target.value }))} placeholder="Email" />
+              <input className="w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 outline-none" type="password" value={form.password} onChange={(event) => setForm((current) => ({ ...current, password: event.target.value }))} placeholder="Password" />
+              <Button className="w-full" type="submit">
+                {mutation.isPending ? "Authenticating..." : "Login"}
+              </Button>
+            </form>
+            {mutation.error ? <div className="mt-3 text-sm text-danger">{mutation.error.response?.data?.message || "Login failed"}</div> : null}
+          </>
+        ) : (
+          <div className="mt-6 rounded-2xl border border-white/10 bg-black/20 p-4">
+            <div className="mb-3 text-sm text-slate-300">Directly reset your password below:</div>
+            <form
+              className="space-y-3"
+              onSubmit={(e) => {
+                e.preventDefault();
+                resetMutation.mutate(resetForm);
+              }}
+            >
+              <input
+                className="w-full rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-sm outline-none"
+                value={resetForm.email}
+                onChange={(e) => setResetForm((c) => ({ ...c, email: e.target.value }))}
+                placeholder="Email to reset"
+                required
+              />
+              <input
+                className="w-full rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-sm outline-none"
+                type="password"
+                value={resetForm.oldPassword}
+                onChange={(e) => setResetForm((c) => ({ ...c, oldPassword: e.target.value }))}
+                placeholder="Current Password"
+                required
+              />
+              <input
+                className="w-full rounded-xl border border-white/10 bg-black/40 px-3 py-2 text-sm outline-none"
+                type="password"
+                value={resetForm.newPassword}
+                onChange={(e) => setResetForm((c) => ({ ...c, newPassword: e.target.value }))}
+                placeholder="New Password"
+                required
+                minLength={6}
+              />
+              <Button className="w-full py-2 text-sm" type="submit" disabled={resetMutation.isPending}>
+                {resetMutation.isPending ? "Resetting..." : "Confirm Reset"}
+              </Button>
+            </form>
+            {resetMutation.error ? <div className="mt-3 text-sm text-danger">{resetMutation.error.response?.data?.message || "Reset failed"}</div> : null}
+            {resetMutation.isSuccess ? <div className="mt-3 text-sm text-emerald-400">Password reset successful! You can now login.</div> : null}
+          </div>
+        )}
         <button
           type="button"
           className="mt-4 text-sm text-cyber"
-          onClick={() => setShowResetHint((current) => !current)}
+          onClick={() => {
+            setShowResetHint((current) => !current);
+            resetMutation.reset();
+          }}
         >
-          Forgot password?
+          {showResetHint ? "Back to login" : "Forgot password?"}
         </button>
-        {showResetHint ? (
-          <div className="mt-3 rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-slate-300">
-            Password reset email flow is not implemented yet. For now, reset the password from an admin account or add a dedicated reset-password backend endpoint.
-          </div>
-        ) : null}
         <div className="mt-6 space-y-2 text-xs text-slate-500">
           {demoCredentials.map((cred) => (
             <div key={cred.email}>{cred.role}: {cred.email} / {cred.password}</div>

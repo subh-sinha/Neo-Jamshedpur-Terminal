@@ -62,3 +62,20 @@ export const updateProfile = asyncHandler(async (req, res) => {
 export const logout = asyncHandler(async (req, res) => {
   res.json({ message: "Logout handled client-side by dropping the token." });
 });
+
+export const resetPassword = asyncHandler(async (req, res) => {
+  const { email, oldPassword, newPassword } = req.body;
+  if (!email || !oldPassword || !newPassword) {
+    throw new AppError("Email, old password, and new password are required", StatusCodes.BAD_REQUEST);
+  }
+  const user = await User.findOne({ email }).select("+password");
+  if (!user) {
+    throw new AppError("User not found", StatusCodes.NOT_FOUND);
+  }
+  if (!(await user.comparePassword(oldPassword))) {
+    throw new AppError("Invalid old password", StatusCodes.UNAUTHORIZED);
+  }
+  user.password = newPassword;
+  await user.save();
+  res.json({ message: "Password reset successful" });
+});
