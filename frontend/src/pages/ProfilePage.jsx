@@ -21,6 +21,10 @@ export function ProfilePage() {
     mutationFn: authApi.updateProfile,
     onSuccess: hydrateUser
   });
+  const providerRequestMutation = useMutation({
+    mutationFn: authApi.requestProvider,
+    onSuccess: hydrateUser
+  });
 
   return (
     <div className="grid gap-6 lg:grid-cols-[0.8fr_1.2fr]">
@@ -40,6 +44,30 @@ export function ProfilePage() {
           <div>Trades completed: {user?.successfulTradesCount}</div>
           <div>Disputes: {user?.disputesCount}</div>
         </div>
+        {user?.role === "citizen" && user?.verificationStatus !== "verified" ? (
+          <div className="mt-6 rounded-2xl border border-white/10 bg-black/20 p-4">
+            <div className="text-sm font-semibold text-white">Become a provider</div>
+            <div className="mt-2 text-sm text-slate-400">
+              Send a verification request so an admin can review your account and upgrade you to provider status.
+            </div>
+            {providerRequestMutation.error ? (
+              <div className="mt-3 text-sm text-danger">
+                {providerRequestMutation.error.response?.data?.message || "Could not submit provider request."}
+              </div>
+            ) : null}
+            <Button
+              className="mt-4"
+              onClick={() => providerRequestMutation.mutate()}
+              disabled={providerRequestMutation.isPending || user?.verificationStatus === "pending"}
+            >
+              {user?.verificationStatus === "pending"
+                ? "Request pending"
+                : providerRequestMutation.isPending
+                  ? "Submitting request..."
+                  : "Request provider verification"}
+            </Button>
+          </div>
+        ) : null}
       </Panel>
       <Panel>
         <div className="mb-4 text-xl font-semibold">Edit profile</div>

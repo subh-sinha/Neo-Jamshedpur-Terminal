@@ -1,9 +1,11 @@
 import { StatusCodes } from "http-status-codes";
+import { NOTIFICATION_CATEGORY, PRIORITY, USER_ROLES, VERIFICATION_STATUS } from "../constants/enums.js";
 import { User } from "../models/User.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { AppError } from "../utils/appError.js";
 import { signToken } from "../utils/jwt.js";
 import { pick } from "../utils/pick.js";
+import { notifyMany } from "../services/notificationService.js";
 
 function authPayload(user) {
   return {
@@ -56,6 +58,42 @@ export const updateProfile = asyncHandler(async (req, res) => {
     },
     { new: true }
   );
+  res.json(user);
+});
+
+export const requestProviderVerification = asyncHandler(async (req, res) => {
+  if (req.user.role === USER_ROLES.PROVIDER || req.user.verificationStatus === VERIFICATION_STATUS.VERIFIED) {
+    throw new AppError("You are already a verified provider", StatusCodes.BAD_REQUEST);
+  }
+
+  if (req.user.verificationStatus === VERIFICATION_STATUS.PENDING) {
+    throw new AppError("Your provider verification request is already pending", StatusCodes.BAD_REQUEST);
+  }
+
+  const user = await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $set: {
+        verificationStatus: VERIFICATION_STATUS.PENDING
+      }
+    },
+    { new: true }
+  );
+
+  const admins = await User.find({ role: USER_ROLES.ADMIN }, "_id");
+  if (admins.length) {
+    await notifyMany(
+      admins.map((admin) => admin._id),
+      {
+        title: "Provider verification request",
+        message: `${user.fullName} requested provider verification.`,
+        category: NOTIFICATION_CATEGORY.VERIFICATION,
+        priority: PRIORITY.HIGH,
+        link: "/admin/users"
+      }
+    );
+  }
+
   res.json(user);
 });
 

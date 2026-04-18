@@ -9,7 +9,7 @@ import { Notification } from "../models/Notification.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { REPUTATION_EVENTS } from "../utils/reputation.js";
 import { applyReputationChange } from "../services/reputationService.js";
-import { notifyMany } from "../services/notificationService.js";
+import { notifyMany, notifyUser } from "../services/notificationService.js";
 
 export const analytics = asyncHandler(async (req, res) => {
   const [users, jobs, trades, pulse, disputes, notifications] = await Promise.all([
@@ -42,6 +42,14 @@ export const verifyUser = asyncHandler(async (req, res) => {
     reason: "Provider verification granted",
     sourceType: "user",
     sourceId: user._id
+  });
+  await notifyUser({
+    user: user._id,
+    title: "Provider verification approved",
+    message: "Your account is now verified as a provider.",
+    category: "verification",
+    priority: PRIORITY.HIGH,
+    link: "/profile"
   });
   res.json(user);
 });
