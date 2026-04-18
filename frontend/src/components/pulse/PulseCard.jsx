@@ -1,8 +1,12 @@
-import { Eye, Radio, Sparkles } from "lucide-react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useEffect, useState } from "react";
+import { ArrowRight, Bookmark, Eye, Heart, Radio, ShieldPlus, Sparkles } from "lucide-react";
 import { Link } from "react-router-dom";
+import { pulseApi } from "../../api/services";
 import { Panel } from "../shared/Panel";
 import { StatusBadge } from "../shared/StatusBadge";
-import { formatCompactDate, formatStatusLabel } from "../../lib/utils";
+import { cn, formatCompactDate, formatStatusLabel } from "../../lib/utils";
+import { useAuthStore } from "../../store/authStore";
 
 const priorityStyles = {
   CRITICAL: "border-danger/40 bg-danger/10 shadow-danger",
@@ -11,11 +15,46 @@ const priorityStyles = {
 };
 
 export function PulseCard({ post }) {
+  const queryClient = useQueryClient();
+  const user = useAuthStore((state) => state.user);
+  const [activeReaction, setActiveReaction] = useState(null);
+  const [saved, setSaved] = useState(Boolean(post.bookmarked));
   const previewMedia = post.media?.[0];
+  const reactMutation = useMutation({
+    mutationFn: (payload) => pulseApi.react(post._id, payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["pulse"] });
+      queryClient.invalidateQueries({ queryKey: ["pulse", post._id] });
+    }
+  });
+  const bookmarkMutation = useMutation({
+    mutationFn: () => pulseApi.bookmark(post._id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["pulse"] });
+      queryClient.invalidateQueries({ queryKey: ["pulse", post._id] });
+    }
+  });
+
+  useEffect(() => {
+    setActiveReaction(null);
+    setSaved(Boolean(post.bookmarked));
+  }, [post._id, post.bookmarked]);
+
+  function handleReaction(type) {
+    setActiveReaction(type);
+    reactMutation.mutate({ type });
+  }
+
+  function handleBookmark() {
+    setSaved((current) => !current);
+    bookmarkMutation.mutate(undefined, {
+      onError: () => setSaved((current) => !current)
+    });
+  }
 
   return (
-    <Link to={`/pulse/${post._id}`} className="block h-full">
-      <Panel className={`h-full transition hover:-translate-y-1 hover:shadow-glow ${priorityStyles[post.priority] || ""}`}>
+    <Panel className={`h-full transition hover:-translate-y-1 hover:shadow-glow ${priorityStyles[post.priority] || ""}`}>
+      <Link to={`/pulse/${post._id}`} className="group block cursor-pointer" aria-label={`Open ${post.title}`}>
         {previewMedia ? (
           <div className="mb-4 overflow-hidden rounded-2xl border border-white/10 bg-black/20">
             {previewMedia.type === "video" ? (
@@ -46,7 +85,48 @@ export function PulseCard({ post }) {
             <span className="inline-flex items-center gap-1"><Eye size={14} />{post.views || 0}</span>
           </span>
         </div>
-      </Panel>
-    </Link>
+        <div className="mt-4 inline-flex items-center gap-2 text-xs font-medium text-cyber transition group-hover:text-white">
+          Read full post
+          <ArrowRight size={14} />
+        </div>
+      </Link>
+      {user ? (
+        <div className="mt-4 flex flex-wrap gap-2 border-t border-white/10 pt-4">
+          <button
+            type="button"
+            onClick={() => handleReaction("signal")}
+            className={cn(
+              "inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-slate-300 transition hover:border-cyber/30 hover:text-white",
+              activeReaction === "signal" && "border-cyber/50 bg-cyber/15 text-white shadow-glow"
+            )}
+          >
+            <Sparkles size={14} className={activeReaction === "signal" ? "text-cyber" : ""} />
+            Like
+          </button>
+          <button
+            type="button"
+            onClick={() => handleReaction("support")}
+            className={cn(
+              "inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-slate-300 transition hover:border-cyber/30 hover:text-white",
+              activeReaction === "support" && "border-cyber/50 bg-cyber/15 text-white shadow-glow"
+            )}
+          >
+            <ShieldPlus size={14} className={activeReaction === "support" ? "text-cyber" : ""} />
+            Support
+          </button>
+          <button
+            type="button"
+            onClick={handleBookmark}
+            className={cn(
+              "inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-slate-300 transition hover:border-cyber/30 hover:text-white",
+              saved && "border-cyber/50 bg-cyber/15 text-white shadow-glow"
+            )}
+          >
+            <Bookmark size={14} className={saved ? "fill-cyber text-cyber" : ""} />
+            Save
+          </button>
+        </div>
+      ) : null}
+    </Panel>
   );
 }

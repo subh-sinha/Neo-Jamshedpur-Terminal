@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Panel } from "../shared/Panel";
 import { StatusBadge } from "../shared/StatusBadge";
 import { getTradePreviewImage } from "../../lib/tradeVisuals";
+import { formatTradeExchange } from "../../lib/utils";
 
 export function TradeCard({ trade }) {
   const previewImage = getTradePreviewImage(trade);
@@ -37,7 +38,7 @@ export function TradeCard({ trade }) {
           <StatusBadge value={trade.status} />
         </div>
         <div className="mt-4 text-sm text-slate-300">{trade.description}</div>
-        <div className="mt-5 text-sm text-cyber">Seeking: {trade.expectedExchange}</div>
+        <div className="mt-5 text-sm text-cyber">Seeking: {formatTradeExchange(trade.expectedExchange)}</div>
       </Panel>
     </Link>
   );

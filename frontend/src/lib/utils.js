@@ -27,6 +27,17 @@ export function formatCurrency(value) {
   }).format(amount);
 }
 
+export function formatTradeExchange(value) {
+  const text = String(value || "").trim();
+  if (!text) return "N/A";
+
+  if (/^\d+(\.\d+)?$/.test(text)) {
+    return formatCurrency(text);
+  }
+
+  return text.replace(/(\d+(?:\.\d+)?)\s*(?:civic\s+)?credits?/gi, (_, amount) => formatCurrency(amount));
+}
+
 export function formatStatusLabel(value) {
   return String(value || "Unknown")
     .replaceAll("_", " ")

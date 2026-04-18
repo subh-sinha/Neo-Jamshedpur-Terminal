@@ -92,7 +92,8 @@ export const NOTIFICATION_CATEGORY = {
   PULSE: "pulse",
   ADMIN: "admin",
   SYSTEM: "system",
-  VERIFICATION: "verification"
+  VERIFICATION: "verification",
+  CHAT: "chat"
 };
 
 export const TRUST_RANKS = [

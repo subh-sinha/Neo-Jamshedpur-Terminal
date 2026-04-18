@@ -1,6 +1,7 @@
 import { TradeListing } from "../models/TradeListing.js";
 import { TradeOffer } from "../models/TradeOffer.js";
 import { TradeTransactionLog } from "../models/TradeTransactionLog.js";
+import { USER_ROLES } from "../constants/enums.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { pick } from "../utils/pick.js";
 import {
@@ -11,6 +12,12 @@ import {
   makeOffer,
   rejectOffer
 } from "../services/tradeService.js";
+
+function canViewOffer({ offer, tradeOwnerId, user }) {
+  if (!user) return false;
+  if (user.role === USER_ROLES.ADMIN) return true;
+  return String(offer.proposer?._id || offer.proposer) === String(user._id) || String(tradeOwnerId) === String(user._id);
+}
 
 export const getTrades = asyncHandler(async (req, res) => {
   const filter = {};
@@ -48,7 +55,10 @@ export const getTrade = asyncHandler(async (req, res) => {
       populate: { path: "proposer", select: "fullName username avatar reputationScore trustRank" }
     });
   const history = await TradeTransactionLog.find({ trade: req.params.id }).populate("actor", "fullName username");
-  res.json({ ...trade.toObject(), history });
+  const visibleOffers = (trade.offers || []).filter((offer) =>
+    canViewOffer({ offer, tradeOwnerId: trade.owner?._id || trade.owner, user: req.user })
+  );
+  res.json({ ...trade.toObject(), offers: visibleOffers, history });
 });
 
 export const updateTrade = asyncHandler(async (req, res) => {
@@ -115,6 +125,15 @@ export const tradeHistory = asyncHandler(async (req, res) => {
 });
 
 export const getNegotiation = asyncHandler(async (req, res) => {
+  const trade = await TradeListing.findById(req.params.id);
   const offer = await TradeOffer.findById(req.params.offerId).populate("proposer", "fullName username avatar");
+  if (!trade || !offer || String(offer.trade) !== String(trade._id)) {
+    res.status(404).json({ message: "Trade or offer not found" });
+    return;
+  }
+  if (!canViewOffer({ offer, tradeOwnerId: trade.owner, user: req.user })) {
+    res.status(403).json({ message: "You cannot view this negotiation" });
+    return;
+  }
   res.json(offer);
 });

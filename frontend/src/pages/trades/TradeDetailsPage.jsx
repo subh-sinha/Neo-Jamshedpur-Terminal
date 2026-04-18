@@ -4,7 +4,7 @@ import { useState } from "react";
 import { tradesApi } from "../../api/services";
 import { Panel } from "../../components/shared/Panel";
 import { StatusBadge } from "../../components/shared/StatusBadge";
-import { formatDate } from "../../lib/utils";
+import { formatDate, formatTradeExchange } from "../../lib/utils";
 import { useAuthStore } from "../../store/authStore";
 import { Button } from "../../components/shared/Button";
 import { getTradePreviewImage } from "../../lib/tradeVisuals";
@@ -58,7 +58,7 @@ export function TradeDetailsPage() {
         <div className="mt-5 text-sm text-slate-300">{data.description}</div>
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           <div className="rounded-2xl border border-white/10 bg-black/20 p-4 text-sm">
-            Expected exchange: <span className="text-cyber">{data.expectedExchange}</span>
+            Expected exchange: <span className="text-cyber">{formatTradeExchange(data.expectedExchange)}</span>
           </div>
           <div className="rounded-2xl border border-white/10 bg-black/20 p-4 text-sm">
             Seller: <span className="text-white">{data.owner?.fullName}</span>

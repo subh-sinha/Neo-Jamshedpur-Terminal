@@ -25,7 +25,7 @@ router.get("/", getTrades);
 router.post("/", protect, createTradeValidator, validate, createTrade);
 router.get("/mine/listings", protect, myTrades);
 router.get("/history/all", protect, tradeHistory);
-router.get("/:id", getTrade);
+router.get("/:id", protect, getTrade);
 router.put("/:id", protect, updateTrade);
 router.delete("/:id", protect, deleteTrade);
 router.post("/:id/offers", protect, makeOfferValidator, validate, createOffer);

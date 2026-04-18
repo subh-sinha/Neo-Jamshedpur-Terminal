@@ -45,7 +45,7 @@ export async function makeOffer({ tradeId, user, offeredValue, note }) {
     message: `${user.fullName} made an offer on ${trade.title}`,
     category: NOTIFICATION_CATEGORY.TRADE,
     priority: PRIORITY.HIGH,
-    link: `/trades/${trade._id}`
+    link: `/trades/${trade._id}/offers/${offer._id}`
   });
 
   return offer;
@@ -80,7 +80,7 @@ export async function counterOffer({ tradeId, offerId, user, message, offeredVal
     title: "Counter-offer received",
     message,
     category: NOTIFICATION_CATEGORY.TRADE,
-    link: `/trades/${trade._id}`
+    link: `/trades/${trade._id}/offers/${offer._id}`
   });
 
   return offer;
@@ -108,7 +108,7 @@ export async function acceptOffer({ tradeId, offerId, user }) {
     message: `Your offer on ${trade.title} has been accepted`,
     category: NOTIFICATION_CATEGORY.TRADE,
     priority: PRIORITY.HIGH,
-    link: `/trades/${trade._id}`
+    link: `/trades/${trade._id}/offers/${offer._id}`
   });
 
   return trade;

@@ -48,6 +48,17 @@ export function OffersPage() {
   const isOwner = user?._id === trade?.owner?._id;
   const otherPartyName = isOwner ? offer?.proposer?.fullName : trade?.owner?.fullName;
 
+  function getSenderLabel(authorId) {
+    if (String(authorId) === String(user?._id)) return "You";
+    if (String(authorId) === String(offer?.proposer?._id || offer?.proposer)) {
+      return offer?.proposer?.fullName || "Other user";
+    }
+    if (String(authorId) === String(trade?.owner?._id || trade?.owner)) {
+      return trade?.owner?.fullName || "Other user";
+    }
+    return otherPartyName || "Other user";
+  }
+
   return (
     <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
       <Panel>
@@ -64,9 +75,19 @@ export function OffersPage() {
         <div className="mt-6 space-y-4">
           {offer?.thread?.map((entry, index) => {
             const mine = String(entry.author) === String(user?._id);
+            const senderLabel = getSenderLabel(entry.author);
             return (
-              <div key={`${entry.createdAt}-${index}`} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
-                <div className={`max-w-xl rounded-3xl border px-4 py-3 ${mine ? "border-cyber/30 bg-cyber/10" : "border-white/10 bg-black/20"}`}>
+              <div key={`${entry.createdAt}-${index}`} className={`flex w-full ${mine ? "justify-end" : "justify-start"}`}>
+                <div
+                  className={`w-full max-w-xl rounded-3xl border px-4 py-3 ${
+                    mine
+                      ? "ml-12 border-cyber/30 bg-cyber/10 text-right"
+                      : "mr-12 border-white/10 bg-black/20 text-left"
+                  }`}
+                >
+                  <div className={`text-xs font-semibold uppercase tracking-[0.18em] ${mine ? "text-cyber" : "text-slate-400"}`}>
+                    {senderLabel}
+                  </div>
                   <div className="text-sm text-white">{entry.message}</div>
                   {entry.offeredValue ? (
                     <div className="mt-2 rounded-2xl bg-black/20 px-3 py-2 text-sm text-cyber">Offer value: {entry.offeredValue}</div>

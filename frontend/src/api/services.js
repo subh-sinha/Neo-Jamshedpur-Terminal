@@ -56,6 +56,7 @@ export const pulseApi = {
 
 export const notificationApi = {
   list: () => api.get("/notifications").then((res) => res.data),
+  read: (id) => api.post(`/notifications/read/${id}`).then((res) => res.data),
   readAll: () => api.post("/notifications/read-all").then((res) => res.data)
 };
 
@@ -73,4 +74,11 @@ export const adminApi = {
 
 export const searchApi = {
   global: (q) => api.get("/search", { params: { q } }).then((res) => res.data)
+};
+
+export const chatApi = {
+  listRooms: () => api.get("/chat").then(res => res.data),
+  getMessages: (roomId) => api.get(`/chat/${roomId}`).then(res => res.data),
+  initiateRoom: (payload) => api.post("/chat", payload).then(res => res.data),
+  sendMessage: (roomId, payload) => api.post(`/chat/${roomId}/messages`, payload).then(res => res.data)
 };

@@ -11,6 +11,7 @@ import pulseRoutes from "./routes/pulseRoutes.js";
 import notificationRoutes from "./routes/notificationRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import searchRoutes from "./routes/searchRoutes.js";
+import chatRoutes from "./routes/chatRoutes.js";
 import { errorHandler, notFound } from "./middleware/errorHandler.js";
 
 export function createApp() {
@@ -43,6 +44,7 @@ export function createApp() {
   app.use("/api/notifications", notificationRoutes);
   app.use("/api/admin", adminRoutes);
   app.use("/api/search", searchRoutes);
+  app.use("/api/chat", chatRoutes);
   app.use(notFound);
   app.use(errorHandler);
 
