@@ -6,7 +6,6 @@ import { HeroPanel } from "../../components/dashboard/HeroPanel";
 import { MetricCard } from "../../components/shared/MetricCard";
 import { ActivityTimeline } from "../../components/dashboard/ActivityTimeline";
 import { AssistantPanel } from "../../components/assistant/AssistantPanel";
-import { SectorMap } from "../../components/map/SectorMap";
 import { JobCard } from "../../components/jobs/JobCard";
 import { TradeCard } from "../../components/trades/TradeCard";
 import { PulseCard } from "../../components/pulse/PulseCard";
@@ -34,10 +33,17 @@ export function DashboardPage() {
   const user = useAuthStore((state) => state.user);
   const jobs = useQuery({ queryKey: ["jobs"], queryFn: () => jobsApi.list({}) });
   const trades = useQuery({ queryKey: ["trades"], queryFn: () => tradesApi.list({}) });
-  const pulse = useQuery({ queryKey: ["pulse"], queryFn: () => pulseApi.list({}) });
+  const pulse = useQuery({
+    queryKey: ["pulse"],
+    queryFn: () => pulseApi.list({}),
+    refetchInterval: 15000
+  });
   const notifications = useQuery({ queryKey: ["notifications"], queryFn: notificationApi.list, enabled: Boolean(user) });
 
   const criticalAlert = pulse.data?.find((item) => item.priority === "CRITICAL");
+  const dashboardPulse = criticalAlert
+    ? (pulse.data || []).filter((item) => item._id !== criticalAlert._id)
+    : pulse.data || [];
 
   return (
     <div className="space-y-6">
@@ -68,7 +74,6 @@ export function DashboardPage() {
             emptyTitle="No trades yet"
             emptyDescription="Trade listings and exchange requests will appear here when they are available."
           />
-          <SectorMap />
           {user?.recentActivity?.length ? (
             <ActivityTimeline items={user.recentActivity} />
           ) : (
@@ -84,9 +89,9 @@ export function DashboardPage() {
               <div className="grid gap-4">
                 {Array.from({ length: 3 }).map((_, index) => <SkeletonCard key={index} />)}
               </div>
-            ) : pulse.data?.length ? (
+            ) : dashboardPulse.length ? (
               <div className="grid gap-4">
-                {pulse.data.slice(0, 3).map((post) => <PulseCard key={post._id} post={post} />)}
+                {dashboardPulse.slice(0, 3).map((post) => <PulseCard key={post._id} post={post} />)}
               </div>
             ) : (
               <EmptyState title="No Pulse updates yet" description="Alerts and city intelligence will appear here when new updates are published." />

@@ -41,7 +41,11 @@ export function PulseDetailsPage() {
 
   const deleteMutation = useMutation({
     mutationFn: () => pulseApi.delete(id),
-    onSuccess: () => navigate("/pulse")
+    onSuccess: async () => {
+      queryClient.removeQueries({ queryKey: ["pulse", id] });
+      await queryClient.invalidateQueries({ queryKey: ["pulse"] });
+      navigate("/pulse");
+    }
   });
 
   if (isLoading) {

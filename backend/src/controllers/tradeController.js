@@ -2,8 +2,10 @@ import { TradeListing } from "../models/TradeListing.js";
 import { TradeOffer } from "../models/TradeOffer.js";
 import { TradeTransactionLog } from "../models/TradeTransactionLog.js";
 import { USER_ROLES } from "../constants/enums.js";
+import { AppError } from "../utils/appError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { pick } from "../utils/pick.js";
+import { StatusCodes } from "http-status-codes";
 import {
   acceptOffer,
   completeTrade,
@@ -54,6 +56,9 @@ export const getTrade = asyncHandler(async (req, res) => {
       path: "offers",
       populate: { path: "proposer", select: "fullName username avatar reputationScore trustRank" }
     });
+  if (!trade) {
+    throw new AppError("Trade not found", StatusCodes.NOT_FOUND);
+  }
   const history = await TradeTransactionLog.find({ trade: req.params.id }).populate("actor", "fullName username");
   const visibleOffers = (trade.offers || []).filter((offer) =>
     canViewOffer({ offer, tradeOwnerId: trade.owner?._id || trade.owner, user: req.user })
@@ -64,12 +69,18 @@ export const getTrade = asyncHandler(async (req, res) => {
 export const updateTrade = asyncHandler(async (req, res) => {
   const query = req.user.role === "admin" ? { _id: req.params.id } : { _id: req.params.id, owner: req.user._id };
   const trade = await TradeListing.findOneAndUpdate(query, { $set: req.body }, { new: true });
+  if (!trade) {
+    throw new AppError("Trade not found", StatusCodes.NOT_FOUND);
+  }
   res.json(trade);
 });
 
 export const deleteTrade = asyncHandler(async (req, res) => {
   const query = req.user.role === "admin" ? { _id: req.params.id } : { _id: req.params.id, owner: req.user._id };
-  await TradeListing.findOneAndDelete(query);
+  const trade = await TradeListing.findOneAndDelete(query);
+  if (!trade) {
+    throw new AppError("Trade not found", StatusCodes.NOT_FOUND);
+  }
   res.json({ message: "Trade deleted" });
 });
 

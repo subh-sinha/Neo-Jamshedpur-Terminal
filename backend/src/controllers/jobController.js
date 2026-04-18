@@ -1,6 +1,8 @@
 import { Job } from "../models/Job.js";
 import { JobApplication } from "../models/JobApplication.js";
 import { JobStatusLog } from "../models/JobStatusLog.js";
+import { StatusCodes } from "http-status-codes";
+import { AppError } from "../utils/appError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { pick } from "../utils/pick.js";
 import { applyForJob, cancelJobWithImpact, createJobDispute, decideJobApplication, updateJobStatus } from "../services/jobService.js";
@@ -74,6 +76,9 @@ export const getJob = asyncHandler(async (req, res) => {
       path: "applicants",
       populate: { path: "applicant", select: "fullName username reputationScore trustRank avatar" }
     });
+  if (!job) {
+    throw new AppError("Job not found", StatusCodes.NOT_FOUND);
+  }
   const logs = await JobStatusLog.find({ job: req.params.id }).populate("actor", "fullName username");
   res.json({ ...job.toObject(), logs });
 });
@@ -81,12 +86,18 @@ export const getJob = asyncHandler(async (req, res) => {
 export const updateJob = asyncHandler(async (req, res) => {
   const query = req.user.role === "admin" ? { _id: req.params.id } : { _id: req.params.id, postedBy: req.user._id };
   const job = await Job.findOneAndUpdate(query, { $set: req.body }, { new: true });
+  if (!job) {
+    throw new AppError("Job not found", StatusCodes.NOT_FOUND);
+  }
   res.json(job);
 });
 
 export const deleteJob = asyncHandler(async (req, res) => {
   const query = req.user.role === "admin" ? { _id: req.params.id } : { _id: req.params.id, postedBy: req.user._id };
-  await Job.findOneAndDelete(query);
+  const job = await Job.findOneAndDelete(query);
+  if (!job) {
+    throw new AppError("Job not found", StatusCodes.NOT_FOUND);
+  }
   res.json({ message: "Job deleted" });
 });
 

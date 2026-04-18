@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { pulseApi } from "../../api/services";
 import { Panel } from "../../components/shared/Panel";
@@ -8,6 +8,7 @@ import { useAuthStore } from "../../store/authStore";
 
 export function PulseCreatePage() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const user = useAuthStore((state) => state.user);
   const canPostHigh = !user || user.role === "admin" || user.role === "provider" || user.verificationStatus === "verified";
   const canPostCritical = !user || user.role === "admin";
@@ -34,7 +35,11 @@ export function PulseCreatePage() {
   }, [user]);
   const mutation = useMutation({
     mutationFn: pulseApi.create,
-    onSuccess: (data) => navigate(`/pulse/${data._id}`)
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["pulse"] });
+      queryClient.invalidateQueries({ queryKey: ["global-critical-pulse"] });
+      navigate(`/pulse/${data._id}`);
+    }
   });
 
   return (

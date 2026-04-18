@@ -19,6 +19,10 @@ export function PulseFeedPage() {
   });
 
   const critical = data.find((post) => post.priority === "CRITICAL");
+  const feedPosts =
+    critical && !debouncedFilters.priority
+      ? data.filter((post) => post._id !== critical._id)
+      : data;
 
   return (
     <div className="space-y-6">
@@ -67,7 +71,7 @@ export function PulseFeedPage() {
           animate="show"
           className="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
         >
-          {data.map((post) => (
+          {feedPosts.map((post) => (
             <motion.div 
               key={post._id}
               variants={{

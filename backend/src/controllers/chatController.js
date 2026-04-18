@@ -16,7 +16,7 @@ export const getRooms = asyncHandler(async (req, res) => {
 export const getMessages = asyncHandler(async (req, res) => {
   const room = await ChatRoom.findById(req.params.roomId);
   if (!room) throw new AppError("Chat room not found", StatusCodes.NOT_FOUND);
-  if (!room.participants.includes(req.user._id)) {
+  if (!room.participants.some((participantId) => String(participantId) === String(req.user._id))) {
     throw new AppError("Not a participant in this room", StatusCodes.FORBIDDEN);
   }
 
@@ -64,7 +64,7 @@ export const sendMessage = asyncHandler(async (req, res) => {
 
   const room = await ChatRoom.findById(req.params.roomId);
   if (!room) throw new AppError("Chat room not found", StatusCodes.NOT_FOUND);
-  if (!room.participants.includes(req.user._id)) {
+  if (!room.participants.some((participantId) => String(participantId) === String(req.user._id))) {
     throw new AppError("Not a participant in this room", StatusCodes.FORBIDDEN);
   }
 

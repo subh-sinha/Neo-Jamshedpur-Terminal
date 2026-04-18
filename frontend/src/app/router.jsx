@@ -9,6 +9,7 @@ import { ProfilePage } from "../pages/ProfilePage";
 import { SettingsPage } from "../pages/SettingsPage";
 import { NotificationsPage } from "../pages/NotificationsPage";
 import { SearchPage } from "../pages/SearchPage";
+import { ChatRoomPage } from "../pages/ChatRoomPage";
 import { JobsPage } from "../pages/jobs/JobsPage";
 import { JobDetailsPage } from "../pages/jobs/JobDetailsPage";
 import { JobFormPage } from "../pages/jobs/JobFormPage";
@@ -46,6 +47,7 @@ export const router = createBrowserRouter([
       { path: "settings", element: <SettingsPage /> },
       { path: "notifications", element: <NotificationsPage /> },
       { path: "search", element: <SearchPage /> },
+      { path: "chat/:roomId", element: <ChatRoomPage /> },
       { path: "jobs", element: <JobsPage /> },
       { path: "jobs/create", element: <JobFormPage /> },
       { path: "jobs/mine", element: <MyJobsPage /> },

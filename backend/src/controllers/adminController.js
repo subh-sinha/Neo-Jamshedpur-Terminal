@@ -6,6 +6,7 @@ import { Job } from "../models/Job.js";
 import { TradeListing } from "../models/TradeListing.js";
 import { PulsePost } from "../models/PulsePost.js";
 import { Notification } from "../models/Notification.js";
+import { AppError } from "../utils/appError.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { REPUTATION_EVENTS } from "../utils/reputation.js";
 import { applyReputationChange } from "../services/reputationService.js";
@@ -36,6 +37,9 @@ export const verifyUser = asyncHandler(async (req, res) => {
     },
     { new: true }
   );
+  if (!user) {
+    throw new AppError("User not found", StatusCodes.NOT_FOUND);
+  }
   await applyReputationChange({
     userId: user._id,
     delta: REPUTATION_EVENTS.PROVIDER_VERIFIED,
@@ -81,6 +85,9 @@ export const resolveDispute = asyncHandler(async (req, res) => {
     },
     { new: true }
   );
+  if (!dispute) {
+    throw new AppError("Dispute not found", StatusCodes.NOT_FOUND);
+  }
   if (req.body.penalizeUserId) {
     await applyReputationChange({
       userId: req.body.penalizeUserId,
