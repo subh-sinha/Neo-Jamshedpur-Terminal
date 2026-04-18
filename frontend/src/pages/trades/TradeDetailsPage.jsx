@@ -25,9 +25,15 @@ export function TradeDetailsPage() {
     }
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: () => tradesApi.delete(id),
+    onSuccess: () => navigate("/trades")
+  });
+
   if (!data) return null;
 
   const isOwner = user?._id === data.owner?._id;
+  const isAdmin = user?.role === "admin";
   const previewImage = getTradePreviewImage(data);
 
   return (
@@ -121,3 +127,6 @@ export function TradeDetailsPage() {
     </div>
   );
 }
+
+
+

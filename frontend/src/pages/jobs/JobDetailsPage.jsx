@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { jobsApi } from "../../api/services";
 import { Panel } from "../../components/shared/Panel";
 import { StatusBadge } from "../../components/shared/StatusBadge";
@@ -13,6 +13,7 @@ const lifecycle = ["POSTED", "APPLIED", "ASSIGNED", "IN_PROGRESS", "COMPLETED", 
 export function JobDetailsPage() {
   const { id } = useParams();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
   const [applicationForm, setApplicationForm] = useState({ message: "", expectedPrice: "", availability: "" });
   const [disputeReason, setDisputeReason] = useState("");
@@ -34,6 +35,11 @@ export function JobDetailsPage() {
       queryClient.invalidateQueries({ queryKey: ["job", id] });
     }
   });
+
+  const deleteMutation = useMutation({
+    mutationFn: () => jobsApi.delete(id),
+    onSuccess: () => navigate("/jobs")
+  });
   const decisionMutation = useMutation({
     mutationFn: ({ applicationId, payload }) => jobsApi.decideApplication(id, applicationId, payload),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["job", id] })
@@ -45,6 +51,7 @@ export function JobDetailsPage() {
       queryClient.invalidateQueries({ queryKey: ["job", id] });
     }
   });
+
 
   if (!data) return null;
 
@@ -146,6 +153,26 @@ export function JobDetailsPage() {
             </Button>
           </Panel>
         ) : null}
+
+        {isOwner || isAdmin ? (
+          <Panel>
+            <div className="text-lg font-semibold text-danger">Danger zone</div>
+            <div className="mt-2 text-sm text-slate-400">Permanently delete this task.</div>
+            {deleteMutation.error ? <div className="mt-3 text-sm text-danger">{deleteMutation.error.response?.data?.message || "Deletion failed."}</div> : null}
+            <Button
+              className="mt-4"
+              variant="danger"
+              disabled={deleteMutation.isPending}
+              onClick={() => {
+                if (window.confirm("Are you sure you want to permanently delete this job?")) {
+                  deleteMutation.mutate();
+                }
+              }}
+            >
+              {deleteMutation.isPending ? "Deleting..." : "Delete job"}
+            </Button>
+          </Panel>
+        ) : null}
       </div>
 
       <div className="space-y-6">
@@ -198,3 +225,5 @@ export function JobDetailsPage() {
     </div>
   );
 }
+
+

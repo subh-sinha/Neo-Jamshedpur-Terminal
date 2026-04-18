@@ -20,7 +20,8 @@ export const jobsApi = {
     api.post(`/jobs/${jobId}/applications/${applicationId}/decision`, payload).then((res) => res.data),
   updateStatus: (id, payload) => api.post(`/jobs/${id}/status`, payload).then((res) => res.data),
   dispute: (id, payload) => api.post(`/jobs/${id}/dispute`, payload).then((res) => res.data),
-  cancel: (id, payload) => api.post(`/jobs/${id}/cancel`, payload).then((res) => res.data)
+  cancel: (id, payload) => api.post(`/jobs/${id}/cancel`, payload).then((res) => res.data),
+  delete: (id) => api.delete(`/jobs/${id}`).then((res) => res.data)
 };
 
 export const tradesApi = {
@@ -34,7 +35,8 @@ export const tradesApi = {
   getOffer: (tradeId, offerId) => api.get(`/trades/${tradeId}/offers/${offerId}`).then((res) => res.data),
   counterOffer: (tradeId, offerId, payload) => api.post(`/trades/${tradeId}/offers/${offerId}/counter`, payload).then((res) => res.data),
   acceptOffer: (tradeId, offerId) => api.post(`/trades/${tradeId}/offers/${offerId}/accept`).then((res) => res.data),
-  rejectOffer: (tradeId, offerId) => api.post(`/trades/${tradeId}/offers/${offerId}/reject`).then((res) => res.data)
+  rejectOffer: (tradeId, offerId) => api.post(`/trades/${tradeId}/offers/${offerId}/reject`).then((res) => res.data),
+  delete: (id) => api.delete(`/trades/${id}`).then((res) => res.data)
 };
 
 export const pulseApi = {
@@ -46,7 +48,8 @@ export const pulseApi = {
   bookmark: (id) => api.post(`/pulse/${id}/bookmark`).then((res) => res.data),
   saved: () => api.get("/pulse/saved/me").then((res) => res.data),
   history: () => api.get("/pulse/history/me").then((res) => res.data),
-  moderate: (id, payload) => api.post(`/pulse/${id}/moderate`, payload).then((res) => res.data)
+  moderate: (id, payload) => api.post(`/pulse/${id}/moderate`, payload).then((res) => res.data),
+  delete: (id) => api.delete(`/pulse/${id}`).then((res) => res.data)
 };
 
 export const notificationApi = {

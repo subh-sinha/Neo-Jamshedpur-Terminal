@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { pulseApi } from "../../api/services";
 import { Panel } from "../../components/shared/Panel";
 import { StatusBadge } from "../../components/shared/StatusBadge";
@@ -11,6 +11,7 @@ export function PulseDetailsPage() {
   const { id } = useParams();
   const queryClient = useQueryClient();
   const user = useAuthStore((state) => state.user);
+  const navigate = useNavigate();
   const { data } = useQuery({
     queryKey: ["pulse", id],
     queryFn: () => pulseApi.detail(id),
@@ -30,7 +31,15 @@ export function PulseDetailsPage() {
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["pulse", id] })
   });
 
+  const deleteMutation = useMutation({
+    mutationFn: () => pulseApi.delete(id),
+    onSuccess: () => navigate("/pulse")
+  });
+
   if (!data) return null;
+
+  const isOwner = user?._id === data.author?._id;
+  const isAdmin = user?.role === "admin";
 
   return (
     <div className="grid gap-6 xl:grid-cols-[1.45fr_0.85fr]">
@@ -89,7 +98,29 @@ export function PulseDetailsPage() {
             </div>
           </Panel>
         ) : null}
+
+        {isOwner || isAdmin ? (
+          <Panel>
+            <div className="text-lg font-semibold text-danger">Danger zone</div>
+            <div className="mt-2 text-sm text-slate-400">Permanently delete this post.</div>
+            {deleteMutation.error ? <div className="mt-3 text-sm text-danger">{deleteMutation.error.response?.data?.message || "Deletion failed."}</div> : null}
+            <Button
+              className="mt-4"
+              variant="danger"
+              disabled={deleteMutation.isPending}
+              onClick={() => {
+                if (window.confirm("Are you sure you want to permanently delete this pulse post?")) {
+                  deleteMutation.mutate();
+                }
+              }}
+            >
+              {deleteMutation.isPending ? "Deleting..." : "Delete post"}
+            </Button>
+          </Panel>
+        ) : null}
       </div>
     </div>
   );
 }
+
+
