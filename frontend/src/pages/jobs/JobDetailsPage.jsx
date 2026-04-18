@@ -213,14 +213,16 @@ export function JobDetailsPage() {
           </div>
         </Panel>
 
-        <Panel>
-          <div className="text-lg font-semibold">Raise dispute</div>
-          <textarea className="mt-4 min-h-28 w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 outline-none" value={disputeReason} onChange={(event) => setDisputeReason(event.target.value)} placeholder="Explain the issue clearly" />
-          {disputeMutation.error ? <div className="mt-3 text-sm text-danger">{disputeMutation.error.response?.data?.message || "Could not raise dispute."}</div> : null}
-          <Button className="mt-4" variant="danger" disabled={isLocked} onClick={() => disputeMutation.mutate({ reason: disputeReason })}>
-            {disputeMutation.isPending ? "Opening dispute..." : "Raise dispute"}
-          </Button>
-        </Panel>
+        {!isLocked ? (
+          <Panel>
+            <div className="text-lg font-semibold">Raise dispute</div>
+            <textarea className="mt-4 min-h-28 w-full rounded-2xl border border-white/10 bg-black/20 px-4 py-3 outline-none" value={disputeReason} onChange={(event) => setDisputeReason(event.target.value)} placeholder="Explain the issue clearly" />
+            {disputeMutation.error ? <div className="mt-3 text-sm text-danger">{disputeMutation.error.response?.data?.message || "Could not raise dispute."}</div> : null}
+            <Button className="mt-4" variant="danger" disabled={isLocked} onClick={() => disputeMutation.mutate({ reason: disputeReason })}>
+              {disputeMutation.isPending ? "Opening dispute..." : "Raise dispute"}
+            </Button>
+          </Panel>
+        ) : null}
       </div>
     </div>
   );

@@ -6,6 +6,7 @@ import { jobsApi } from "../../api/services";
 import { JobCard } from "../../components/jobs/JobCard";
 import { Button } from "../../components/shared/Button";
 import { SectionHeader } from "../../components/shared/SectionHeader";
+import { CardSkeleton } from "../../components/shared/CardSkeleton";
 import { useDebounce } from "../../hooks/useDebounce";
 
 export function JobsPage() {
@@ -19,7 +20,7 @@ export function JobsPage() {
     maxBudget: ""
   });
   const debouncedFilters = useDebounce(filters, 400);
-  const { data = [] } = useQuery({ queryKey: ["jobs", debouncedFilters], queryFn: () => jobsApi.list(debouncedFilters) });
+  const { data = [], isLoading } = useQuery({ queryKey: ["jobs", debouncedFilters], queryFn: () => jobsApi.list(debouncedFilters) });
 
   return (
     <div className="space-y-6">
@@ -61,27 +62,33 @@ export function JobsPage() {
         <input className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 outline-none" type="number" value={filters.minBudget} onChange={(event) => setFilters((current) => ({ ...current, minBudget: event.target.value }))} placeholder="Min budget" />
         <input className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 outline-none" type="number" value={filters.maxBudget} onChange={(event) => setFilters((current) => ({ ...current, maxBudget: event.target.value }))} placeholder="Max budget" />
       </div>
-      <motion.div 
-        variants={{
-          hidden: { opacity: 0 },
-          show: { opacity: 1, transition: { staggerChildren: 0.1 } }
-        }}
-        initial="hidden"
-        animate="show"
-        className="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
-      >
-        {data.map((job) => (
-          <motion.div 
-            key={job._id}
-            variants={{
-              hidden: { opacity: 0, y: 20 },
-              show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
-            }}
-          >
-            <JobCard job={job} />
-          </motion.div>
-        ))}
-      </motion.div>
+      {isLoading ? (
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {[...Array(6)].map((_, i) => <CardSkeleton key={i} />)}
+        </div>
+      ) : (
+        <motion.div 
+          variants={{
+            hidden: { opacity: 0 },
+            show: { opacity: 1, transition: { staggerChildren: 0.1 } }
+          }}
+          initial="hidden"
+          animate="show"
+          className="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
+        >
+          {data.map((job) => (
+            <motion.div 
+              key={job._id}
+              variants={{
+                hidden: { opacity: 0, y: 20 },
+                show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+              }}
+            >
+              <JobCard job={job} />
+            </motion.div>
+          ))}
+        </motion.div>
+      )}
     </div>
   );
 }
