@@ -14,7 +14,7 @@ export function PulseCard({ post }) {
   const previewMedia = post.media?.[0];
 
   return (
-    <Link to={`/pulse/${post._id}`}>
+    <Link to={`/pulse/${post._id}`} className="block h-full">
       <Panel className={`h-full transition hover:-translate-y-1 hover:shadow-glow ${priorityStyles[post.priority] || ""}`}>
         {previewMedia ? (
           <div className="mb-4 overflow-hidden rounded-2xl border border-white/10 bg-black/20">

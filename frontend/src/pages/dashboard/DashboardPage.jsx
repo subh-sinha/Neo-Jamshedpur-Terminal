@@ -81,11 +81,11 @@ export function DashboardPage() {
           </SectionCard>
           <SectionCard title="Pulse" icon={Newspaper}>
             {pulse.isLoading ? (
-              <div className="space-y-4">
+              <div className="grid gap-4">
                 {Array.from({ length: 3 }).map((_, index) => <SkeletonCard key={index} />)}
               </div>
             ) : pulse.data?.length ? (
-              <div className="space-y-4">
+              <div className="grid gap-4">
                 {pulse.data.slice(0, 3).map((post) => <PulseCard key={post._id} post={post} />)}
               </div>
             ) : (
