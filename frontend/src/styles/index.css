@@ -31,3 +31,8 @@ body {
   background-size: 100% 8px;
   mix-blend-mode: screen;
 }
+
+select option {
+  background-color: #0f172a;
+  color: #fff;
+}

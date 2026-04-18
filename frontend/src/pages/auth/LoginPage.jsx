@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { Link, useNavigate } from "react-router-dom";
+import { GoogleLogin } from "@react-oauth/google";
 import { authApi } from "../../api/services";
 import { useAuthStore } from "../../store/authStore";
 import { Button } from "../../components/shared/Button";
@@ -14,6 +15,14 @@ export function LoginPage() {
   const [showResetHint, setShowResetHint] = useState(false);
   const mutation = useMutation({
     mutationFn: authApi.login,
+    onSuccess: (data) => {
+      setAuth(data);
+      navigate("/dashboard");
+    }
+  });
+
+  const googleMutation = useMutation({
+    mutationFn: (token) => authApi.googleAuth({ token }),
     onSuccess: (data) => {
       setAuth(data);
       navigate("/dashboard");
@@ -48,6 +57,23 @@ export function LoginPage() {
                 {mutation.isPending ? "Authenticating..." : "Login"}
               </Button>
             </form>
+            
+            <div className="mt-6 flex items-center gap-4">
+              <div className="h-px flex-1 bg-white/10"></div>
+              <div className="text-xs font-medium uppercase tracking-[0.2em] text-slate-500">Or</div>
+              <div className="h-px flex-1 bg-white/10"></div>
+            </div>
+            
+            <div className="mt-6 flex justify-center">
+              <GoogleLogin
+                onSuccess={(credentialResponse) => googleMutation.mutate(credentialResponse.credential)}
+                onError={() => console.error("Google Login Failed")}
+                theme="filled_black"
+                shape="pill"
+              />
+            </div>
+            
+            {googleMutation.error ? <div className="mt-3 text-sm text-danger">{googleMutation.error.response?.data?.message || "Google Login failed"}</div> : null}
             {mutation.error ? <div className="mt-3 text-sm text-danger">{mutation.error.response?.data?.message || "Login failed"}</div> : null}
           </>
         ) : (

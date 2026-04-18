@@ -1,4 +1,5 @@
 import { StatusCodes } from "http-status-codes";
+import { OAuth2Client } from "google-auth-library";
 import { NOTIFICATION_CATEGORY, PRIORITY, USER_ROLES, VERIFICATION_STATUS } from "../constants/enums.js";
 import { User } from "../models/User.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
@@ -117,3 +118,37 @@ export const resetPassword = asyncHandler(async (req, res) => {
   await user.save();
   res.json({ message: "Password reset successful" });
 });
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+export const googleAuth = asyncHandler(async (req, res) => {
+  const { token } = req.body;
+  if (!token) throw new AppError("Google token is required", StatusCodes.BAD_REQUEST);
+
+  const ticket = await googleClient.verifyIdToken({
+    idToken: token,
+    audience: process.env.GOOGLE_CLIENT_ID
+  });
+  const payload = ticket.getPayload();
+  const { email, name, picture } = payload;
+
+  let user = await User.findOne({ email });
+  if (!user) {
+    const baseUsername = email.split("@")[0].replace(/[^a-zA-Z0-9]/g, "");
+    const randomSuffix = Math.random().toString(36).substring(2, 6);
+    const generatedUsername = baseUsername + randomSuffix;
+    const generatedPassword = Math.random().toString(36).slice(-10) + "A1!";
+
+    user = await User.create({
+      fullName: name,
+      username: generatedUsername,
+      email: email,
+      password: generatedPassword,
+      avatar: picture || "https://api.dicebear.com/8.x/shapes/svg?seed=" + generatedUsername,
+      role: USER_ROLES.CITIZEN
+    });
+  }
+
+  res.json(authPayload(user));
+});
+
