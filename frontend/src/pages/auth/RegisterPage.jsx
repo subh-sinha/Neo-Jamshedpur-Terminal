@@ -71,11 +71,11 @@ export function RegisterPage() {
           <div className="h-px flex-1 bg-white/10"></div>
         </div>
 
-        <div className="mt-6 flex justify-center">
+        <div className="mt-6 flex justify-center [&>div]:!w-full [&>div>div]:!w-full [&_iframe]:!w-full [&_iframe]:!max-w-full">
           <GoogleLogin
             onSuccess={(credentialResponse) => googleMutation.mutate(credentialResponse.credential)}
             onError={() => console.error("Google Signup Failed")}
-            theme="filled_black"
+            theme="outline"
             shape="pill"
             text="signup_with"
           />

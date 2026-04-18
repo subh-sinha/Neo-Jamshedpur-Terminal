@@ -57,22 +57,22 @@ export function LoginPage() {
                 {mutation.isPending ? "Authenticating..." : "Login"}
               </Button>
             </form>
-            
+
             <div className="mt-6 flex items-center gap-4">
               <div className="h-px flex-1 bg-white/10"></div>
               <div className="text-xs font-medium uppercase tracking-[0.2em] text-slate-500">Or</div>
               <div className="h-px flex-1 bg-white/10"></div>
             </div>
-            
-            <div className="mt-6 flex justify-center">
+
+            <div className="mt-6 flex justify-center [&>div]:!w-full [&>div>div]:!w-full [&_iframe]:!w-full [&_iframe]:!max-w-full">
               <GoogleLogin
                 onSuccess={(credentialResponse) => googleMutation.mutate(credentialResponse.credential)}
                 onError={() => console.error("Google Login Failed")}
-                theme="filled_black"
+                theme="outline"
                 shape="pill"
               />
             </div>
-            
+
             {googleMutation.error ? <div className="mt-3 text-sm text-danger">{googleMutation.error.response?.data?.message || "Google Login failed"}</div> : null}
             {mutation.error ? <div className="mt-3 text-sm text-danger">{mutation.error.response?.data?.message || "Login failed"}</div> : null}
           </>

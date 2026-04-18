@@ -1,16 +1,19 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { pulseApi } from "../../api/services";
 import { PulseCard } from "../../components/pulse/PulseCard";
 import { SectionHeader } from "../../components/shared/SectionHeader";
 import { Button } from "../../components/shared/Button";
+import { useDebounce } from "../../hooks/useDebounce";
 
 export function PulseFeedPage() {
   const [filters, setFilters] = useState({ q: "", category: "", priority: "", sort: "priority" });
+  const debouncedFilters = useDebounce(filters, 400);
   const { data = [] } = useQuery({
-    queryKey: ["pulse", filters],
-    queryFn: () => pulseApi.list(filters),
+    queryKey: ["pulse", debouncedFilters],
+    queryFn: () => pulseApi.list(debouncedFilters),
     refetchInterval: 15000
   });
 
@@ -49,9 +52,27 @@ export function PulseFeedPage() {
           <option value="trending">Trending</option>
         </select>
       </div>
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-        {data.map((post) => <PulseCard key={post._id} post={post} />)}
-      </div>
+      <motion.div 
+        variants={{
+          hidden: { opacity: 0 },
+          show: { opacity: 1, transition: { staggerChildren: 0.1 } }
+        }}
+        initial="hidden"
+        animate="show"
+        className="grid gap-4 md:grid-cols-2 xl:grid-cols-3"
+      >
+        {data.map((post) => (
+          <motion.div 
+            key={post._id}
+            variants={{
+              hidden: { opacity: 0, y: 20 },
+              show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 300, damping: 24 } }
+            }}
+          >
+            <PulseCard post={post} />
+          </motion.div>
+        ))}
+      </motion.div>
     </div>
   );
 }
