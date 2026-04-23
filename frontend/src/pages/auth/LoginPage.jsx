@@ -129,9 +129,7 @@ export function LoginPage() {
           {showResetHint ? "Back to login" : "Forgot password?"}
         </button>
         <div className="mt-6 space-y-2 text-xs text-slate-500">
-          {demoCredentials.map((cred) => (
-            <div key={cred.email}>{cred.role}: {cred.email} / {cred.password}</div>
-          ))}
+
         </div>
         <Link to="/register" className="mt-6 block text-sm text-cyber">
           Register new identity

@@ -58,6 +58,8 @@ export function JobDetailsPage() {
   const isOwner = user?._id === data.postedBy?._id;
   const isWorker = user?._id === data.selectedWorker?._id;
   const isAdmin = user?.role === "admin";
+  const myApplication = data.applicants?.find((application) => application.applicant?._id === user?._id);
+  const hasApplied = Boolean(myApplication);
   const activeIndex = lifecycle.indexOf(data.status);
   const isLocked = ["CANCELLED", "DISPUTED", "VERIFIED"].includes(data.status);
   const canCancel =
@@ -109,7 +111,7 @@ export function JobDetailsPage() {
           ) : null}
         </Panel>
 
-        {!isOwner && !isLocked ? (
+        {!isOwner && !isLocked && !hasApplied ? (
           <Panel>
             <div className="text-lg font-semibold">Apply for this task</div>
             <div className="mt-4 grid gap-3">
@@ -121,6 +123,22 @@ export function JobDetailsPage() {
             <Button className="mt-4" onClick={() => applyMutation.mutate({ ...applicationForm, expectedPrice: Number(applicationForm.expectedPrice) })}>
               {applyMutation.isPending ? "Applying..." : "Submit application"}
             </Button>
+          </Panel>
+        ) : null}
+
+        {!isOwner && !isLocked && hasApplied ? (
+          <Panel>
+            <div className="text-lg font-semibold">Application submitted</div>
+            <div className="mt-2 text-sm text-slate-400">
+              You have already applied for this task, so the application form is hidden.
+            </div>
+            <div className="mt-4 flex items-center justify-between gap-3 rounded-2xl border border-white/10 bg-black/20 p-4">
+              <div>
+                <div className="text-sm font-semibold text-white">Your application</div>
+                <div className="mt-1 text-xs text-slate-500">Submitted on {formatDate(myApplication.createdAt)}</div>
+              </div>
+              <StatusBadge value={myApplication.status} />
+            </div>
           </Panel>
         ) : null}
 
